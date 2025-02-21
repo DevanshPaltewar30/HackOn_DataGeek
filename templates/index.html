@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Upload & Sorting</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .sort-buttons, .upload-section {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+        }
+        .document {
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="upload-section">
+            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" />
+            <button onclick="uploadFile()">Upload</button>
+        </div>
+        <div class="sort-buttons">
+            <button onclick="sortDocuments('date')">Sort by Date</button>
+            <button onclick="sortDocuments('type')">Sort by Type</button>
+        </div>
+        <div id="documents"></div>
+    </div>
+    <script>
+        function uploadFile() {
+            const fileInput = document.getElementById("fileInput");
+            if (fileInput.files.length === 0) {
+                alert("Please select a file to upload.");
+                return;
+            }
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append("file", file);
+            
+            fetch("/upload", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const docList = document.getElementById("documents");
+                    const docItem = document.createElement("div");
+                    docItem.classList.add("document");
+                    docItem.dataset.date = data.date;
+                    docItem.dataset.type = data.type;
+                    docItem.innerText = `${data.name} - ${data.date} (${data.type})`;
+                    docList.appendChild(docItem);
+                }
+            })
+            .catch(error => console.error("Error uploading file:", error));
+        }
+
+        function sortDocuments(type) {
+            const container = document.getElementById("documents");
+            const docs = Array.from(container.children);
+            docs.sort((a, b) => {
+                if (type === "date") {
+                    return new Date(a.dataset.date) - new Date(b.dataset.date);
+                } else if (type === "type") {
+                    return a.dataset.type.localeCompare(b.dataset.type);
+                }
+            });
+            container.innerHTML = "";
+            docs.forEach(doc => container.appendChild(doc));
+        }
+    </script>
+</body>
+</html>
