@@ -14,7 +14,7 @@ UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
 
 classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
 
@@ -26,14 +26,15 @@ date_patterns = [
     r"\b\d{1,2} (?:January|February|March|April|May|June|July|August|September|October|November|December) \d{4}\b"  # 1 January 2023
 ]
 
-# Function to extract key dates using spaCy NLP and regex
-def extract_dates(text):
+# Function to extract key dates and names using spaCy NLP and regex
+def extract_dates_and_names(text):
     doc = nlp(text)
+    names = [ent.text for ent in doc.ents if ent.label_ == "PERSON"]
     extracted_dates = set()
     
     # Extract dates using spaCy
     for ent in doc.ents:
-        if ent.label_ == "DATE" and any(char.isdigit() for char in ent.text):  # Ensure the date contains numbers
+        if ent.label_ == "DATE" and len(ent.text) > 5:  # Filter out short or incorrect matches
             extracted_dates.add(ent.text)
     
     # Extract valid dates using regex
@@ -41,60 +42,7 @@ def extract_dates(text):
         matches = re.findall(pattern, text)
         extracted_dates.update(matches)
     
-    return list(extracted_dates)
-
-# Function to extract valid names using spaCy NLP
-# Function to extract valid names using spaCy NLP
-def extract_names(text):
-    doc = nlp(text)
-    extracted_names = set()
-    
-    for ent in doc.ents:
-        if ent.label_ == "PERSON":
-            name = ent.text.strip()
-            
-            # Exclude if name is too long or contains known false positives
-            if len(name.split()) > 3:  
-                continue  # Skip long phrases
-            
-            # Exclude locations, hospitals, companies, and known incorrect names
-            if any(word in name.lower() for word in ["hospital", "road", "warehouse", "mandir", "ring road", "coworking", "charges", "building", "taluka", "company", "pvt", "ltd", "co"]):
-                continue
-            
-            # Ensure name starts with a capital letter and follows typical name patterns
-            if re.match(r"^[A-Z][a-z]+( [A-Z][a-z]+)?$", name):  
-                extracted_names.add(name)
-    
-    return list(extracted_names)
-
-# Function to extract text from an image using Tesseract OCR
-def extract_text_from_image(image_path):
-    try:
-        img = Image.open(image_path)
-        text = pytesseract.image_to_string(img)
-        return text.strip()
-    except Exception as e:
-        return f"Error processing image: {str(e)}"
-
-# Function to extract text from a PDF file
-def extract_text_from_pdf(pdf_path):
-    text = ""
-    try:
-        with fitz.open(pdf_path) as doc:
-            for page in doc:
-                text += page.get_text("text") + "\n"
-        return text.strip() if text else "Error: No text found in PDF"
-    except Exception as e:
-        return f"Error processing PDF: {str(e)}"
-
-# Function to extract text from a Word file (.docx)
-def extract_text_from_docx(docx_path):
-    try:
-        doc = docx.Document(docx_path)
-        text = "\n".join([para.text for para in doc.paragraphs])
-        return text.strip() if text else "Error: No text found in DOCX"
-    except Exception as e:
-        return f"Error processing DOCX: {str(e)}"
+    return list(extracted_dates), names
 
 # Preprocess extracted text for better classification
 def preprocess_text(text):
@@ -130,6 +78,38 @@ def categorize_document(text):
     result = classifier(text, candidate_labels=categories)
     return result["labels"][0]
 
+# Function to extract text from an image using Tesseract OCR
+def extract_text_from_image(image_path):
+    try:
+        if not os.path.exists(image_path):
+            return f"Error: File not found - {image_path}"
+        
+        img = Image.open(image_path)
+        text = pytesseract.image_to_string(img)
+        return text.strip()
+    except Exception as e:
+        return f"Error processing image: {str(e)}"
+
+# Function to extract text from a PDF file
+def extract_text_from_pdf(pdf_path):
+    text = ""
+    try:
+        with fitz.open(pdf_path) as doc:
+            for page in doc:
+                text += page.get_text("text") + "\n"
+        return text.strip() if text else "Error: No text found in PDF"
+    except Exception as e:
+        return f"Error processing PDF: {str(e)}"
+
+# Function to extract text from a Word file (.docx)
+def extract_text_from_docx(docx_path):
+    try:
+        doc = docx.Document(docx_path)
+        text = "\n".join([para.text for para in doc.paragraphs])
+        return text.strip() if text else "Error: No text found in DOCX"
+    except Exception as e:
+        return f"Error processing DOCX: {str(e)}"
+
 # Function to process documents based on file type
 def process_documents():
     for filename in os.listdir(UPLOAD_FOLDER):
@@ -144,8 +124,7 @@ def process_documents():
         else:
             continue  # Skip unsupported files
 
-        dates = extract_dates(text)
-        names = extract_names(text)
+        dates, names = extract_dates_and_names(text)
         category = categorize_document(text)
         
         print(f"Processing file: {filename}")
