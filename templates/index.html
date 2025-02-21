@@ -3,65 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="index.css">
-    <title>Document Upload & Sorting</title>
-
+    <title>DocxSort</title>
+    <link rel="stylesheet" href="{{url_for('static', filename = 'index.css')}}">
 </head>
-<body>
-    <div class="container">
-        <div class="upload-section">
-            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" />
-            <button onclick="uploadFile()">Upload</button>
-        </div>
-        <div class="sort-buttons">
-            <button onclick="sortDocuments('date')">Sort by Date</button>
-            <button onclick="sortDocuments('type')">Sort by Type</button>
-        </div>
-        <div id="documents"></div>
-    </div>
-    <script>
-        function uploadFile() {
-            const fileInput = document.getElementById("fileInput");
-            if (fileInput.files.length === 0) {
-                alert("Please select a file to upload.");
-                return;
-            }
-            const file = fileInput.files[0];
-            const formData = new FormData();
-            formData.append("file", file);
-            
-            fetch("/upload", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const docList = document.getElementById("documents");
-                    const docItem = document.createElement("div");
-                    docItem.classList.add("document");
-                    docItem.dataset.date = data.date;
-                    docItem.dataset.type = data.type;
-                    docItem.innerText = `${data.name} - ${data.date} (${data.type})`;
-                    docList.appendChild(docItem);
-                }
-            })
-            .catch(error => console.error("Error uploading file:", error));
-        }
+<body class="fade-in">
 
-        function sortDocuments(type) {
-            const container = document.getElementById("documents");
-            const docs = Array.from(container.children);
-            docs.sort((a, b) => {
-                if (type === "date") {
-                    return new Date(a.dataset.date) - new Date(b.dataset.date);
-                } else if (type === "type") {
-                    return a.dataset.type.localeCompare(b.dataset.type);
-                }
-            });
-            container.innerHTML = "";
-            docs.forEach(doc => container.appendChild(doc));
-        }
-    </script>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <h1 class="logo">DocxSort</h1>
+        </div>
+        <div class="nav-right"> 
+            <a href="/about" class="nav-btn">About</a>
+            <a href="/contact" class="nav-btn">Contact</a>
+            <a href="/tutorial" class="nav-btn">How to Use</a>
+            <button id="dark-mode-btn" class="nav-btn">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+    <h2 class="upload-heading">Upload Your Files</h2>
+
+    <div id="drop-area" class="upload-box">
+        <p>Drag & Drop your files here or</p>
+        <input type="file" id="fileInput" hidden accept=".zip">
+        <button id="upload-btn">Choose File</button>
+        <p id="file-name">No file selected</p>
+    </div>
+
+    <button id="download-btn">Download Processed ZIP</button>
+</main>
+
+
+    <script src="{{url_for('static', filename = 'index.js')}}"></script>
 </body>
 </html>

@@ -8,6 +8,7 @@ import docx  # python-docx for Word document processing
 from transformers import pipeline
 import re
 import shutil  # For creating ZIP files
+import zipfile
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -49,6 +50,22 @@ def extract_dates_and_names(text):
         extracted_dates.update(matches)
     
     return list(extracted_dates), names
+
+# Function to extract files from a ZIP archive
+def extract_zip(zip_path, extract_to=UPLOAD_FOLDER):
+    try:
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_to)
+        print(f"Extracted ZIP file: {zip_path}")
+
+        # Remove the ZIP file after extraction (optional)
+        os.remove(zip_path)
+
+        # Process extracted files immediately
+        process_documents()
+
+    except Exception as e:
+        print(f"Error extracting ZIP file: {str(e)}")
 
 # Preprocess extracted text for better classification
 def preprocess_text(text):
@@ -121,6 +138,10 @@ def process_documents():
     for filename in os.listdir(UPLOAD_FOLDER):
         file_path = os.path.join(UPLOAD_FOLDER, filename)
         
+        if filename.lower().endswith(".zip"):
+            extract_zip(file_path)
+            continue
+
         if filename.lower().endswith((".png", ".jpg", ".jpeg", ".tiff", ".bmp", ".gif")):
             text = extract_text_from_image(file_path)
         elif filename.lower().endswith(".pdf"):

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Complete</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <style>
+        /* Centering the content */
+        .content {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        /* Styling the download button */
+        .download-box {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border-radius: 10px;
+            transition: 0.3s ease-in-out;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .download-btn:hover {
+            background: linear-gradient(135deg, #0056b3, #003f80);
+            transform: scale(1.05);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="fade-in">
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <h1 class="logo">DocxSort</h1>
+        </div>
+        <div class="nav-right">
+            <a href="/" class="nav-btn">Home</a>
+            <a href="/about" class="nav-btn">About</a>
+            <a href="/contact" class="nav-btn">Contact</a>
+            <button id="dark-mode-btn" class="nav-btn">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+        <br><br><br><br><br><br><br><br><br><br>
+        <h2 class="success-heading">Your Documents Have Been Sorted Successfully!</h2>
+        <p class="success-message">Click the button below to download your sorted files.</p>
+        
+        <div class="download-box">
+            <a href="{{ zip_file_url }}" id="download-link" class="download-btn">Download Files</a>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='index.js') }}"></script>
+</body>
+</html>

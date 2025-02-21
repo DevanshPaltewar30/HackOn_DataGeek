@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body class="fade-in">
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <h1 class="logo">DocxSort</h1>
+        </div>
+        <div class="nav-right">
+            <a href="index.html" class="nav-btn">Home</a>
+            <a href="about.html" class="nav-btn" >About</a>
+            <a href="tutorial.html" class="nav-btn">How to Use</a>
+            <button id="dark-mode-btn" class="nav-btn">🌙 </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+        <h1 class="website-title">Contact the Developer Through Email</h1>
+        <p class="contact-text">Your Email:</p>
+        
+        <form action="mailto:maker@example.com" method="post" enctype="text/plain" class="contact-form">
+            <input type="email" id="email" name="email" required>
+            
+            <p class="contact-text">Write a Message/Feedback for Developer:</p>
+            <textarea id="message" name="message" rows="5" required></textarea>
+            
+            <button type="submit" id="send-btn">Send</button>
+        </form>
+    </main>
+
+    <script src="index.js"></script>
+</body>
+</html>

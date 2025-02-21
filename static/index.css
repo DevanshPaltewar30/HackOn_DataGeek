@@ -1,0 +1,239 @@
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f7fa;
+    color: #2c3e50;
+    margin: 0;
+    text-align: center;
+    transition: background 0.3s, color 0.3s;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+body.loaded {
+    opacity: 1;
+}
+
+/* Dark Mode */
+.dark-mode {
+    background-color: #1e272e;
+    color: #ecf0f1;
+}
+
+/* Navbar */
+.navbar {
+    width: 100%;
+    background: #6c5ce7;
+    color: white;
+    padding: 15px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+/* Navbar Logo */
+.navbar .logo {
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+}
+
+/* Navbar Buttons */
+.nav-right .nav-btn {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 25px;
+    margin: 0 10px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #f1c40f, #e67e22);
+    color: black;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border: none;
+    transition: 0.4s ease-in-out;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.nav-right .nav-btn:hover {
+    background: linear-gradient(135deg, #e67e22, #f1c40f);
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark Mode Button */
+#dark-mode-btn {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 25px;
+    margin: 0 10px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #f1c40f, #e67e22);
+    color: black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border: none;
+    transition: 0.4s ease-in-out;
+    cursor: pointer;
+}
+
+#dark-mode-btn:hover {
+    background: linear-gradient(135deg, #e67e22, #f1c40f);
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark Mode Style for Navbar Buttons */
+.dark-mode .nav-right .nav-btn, 
+.dark-mode #dark-mode-btn {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: white;
+}
+
+.dark-mode .nav-right .nav-btn:hover, 
+.dark-mode #dark-mode-btn:hover {
+    background: linear-gradient(135deg, #8e44ad, #9b59b6);
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Website Title */
+.website-title {
+    font-size: 40px;
+    font-weight: bold;
+    margin: 80px 0 20px;
+    color: #8e44ad;
+}
+
+.dark-mode .website-title {
+    color: #f1c40f;
+}
+
+/* Upload Section */
+.upload-heading {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #6c5ce7;
+}
+
+.dark-mode .upload-heading {
+    color: #f1c40f;
+}
+
+/* Upload Box */
+.upload-box {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    border: 2px dashed #6c5ce7;
+    transition: 0.3s;
+    width: 50%;
+    margin: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.dark-mode .upload-box {
+    background: #2c3e50;
+    border-color: #9b59b6;
+    color: white;
+}
+
+.dark-mode .upload-box:hover {
+    background: #34495e;
+}
+
+.upload-box.drag-over {
+    background: #dcd6f7;
+    border-color: #341f97;
+}
+/* Profile Icon */
+#profile-icon {
+    width: 40px; /* Adjust size */
+    height: 40px;
+    border-radius: 50%; /* Makes it circular */
+    object-fit: cover;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-right: 15px; /* Adds spacing between icon and logo */
+    border: 2px solid white; /* White border for visibility */
+}
+
+/* Hover Effect */
+#profile-icon:hover {
+    transform: scale(1.1);
+    border-color: #f1c40f;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+/* Dark Mode Profile Icon */
+.dark-mode #profile-icon {
+    border-color: #f1c40f;
+}
+
+.dark-mode #profile-icon:hover {
+    border-color: #e67e22;
+}
+
+/* Align navbar items */
+.nav-left {
+    display: flex;
+    align-items: center;
+}
+
+
+/* Upload Button */
+#upload-btn {
+    padding: 15px 25px;
+    background: #8e44ad;
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: 0.3s;
+    margin-top: 20px;
+}
+
+#upload-btn:hover {
+    background: #732d91;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .nav-right .nav-btn, 
+    #dark-mode-btn {
+        margin: 10px 0;
+        width: 100%;
+        text-align: center;
+    }
+
+    .upload-box {
+        width: 80%;
+    }
+}
