@@ -6,28 +6,75 @@ import os
 import fitz  # PyMuPDF for PDF processing
 import docx  # python-docx for Word document processing
 from transformers import pipeline
+import re
 
-# Load spaCy NLP model
 nlp = spacy.load("en_core_web_sm")
 
-# Ensure the uploads directory exists
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-# Set Tesseract OCR path (update this based on your system)
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-# Load the pretrained document classification model from Hugging Face
 classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+
+# Define regex pattern for valid date formats
+date_patterns = [
+    r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b",  # Matches DD/MM/YYYY, MM-DD-YYYY
+    r"\b\d{4}[/-]\d{1,2}[/-]\d{1,2}\b",  # Matches YYYY-MM-DD or YYYY/MM/DD
+    r"\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2}, \d{4}\b",  # Jan 1, 2023
+    r"\b\d{1,2} (?:January|February|March|April|May|June|July|August|September|October|November|December) \d{4}\b"  # 1 January 2023
+]
+
+# Function to extract key dates using spaCy NLP and regex
+def extract_dates(text):
+    doc = nlp(text)
+    extracted_dates = set()
+    
+    # Extract dates using spaCy
+    for ent in doc.ents:
+        if ent.label_ == "DATE" and any(char.isdigit() for char in ent.text):  # Ensure the date contains numbers
+            extracted_dates.add(ent.text)
+    
+    # Extract valid dates using regex
+    for pattern in date_patterns:
+        matches = re.findall(pattern, text)
+        extracted_dates.update(matches)
+    
+    return list(extracted_dates)
+
+# Function to extract valid names using spaCy NLP
+# Function to extract valid names using spaCy NLP
+def extract_names(text):
+    doc = nlp(text)
+    extracted_names = set()
+    
+    for ent in doc.ents:
+        if ent.label_ == "PERSON":
+            name = ent.text.strip()
+            
+            # Exclude if name is too long or contains known false positives
+            if len(name.split()) > 3:  
+                continue  # Skip long phrases
+            
+            # Exclude locations, hospitals, companies, and known incorrect names
+            if any(word in name.lower() for word in ["hospital", "road", "warehouse", "mandir", "ring road", "coworking", "charges", "building", "taluka", "company", "pvt", "ltd", "co"]):
+                continue
+            
+            # Ensure name starts with a capital letter and follows typical name patterns
+            if re.match(r"^[A-Z][a-z]+( [A-Z][a-z]+)?$", name):  
+                extracted_names.add(name)
+    
+    return list(extracted_names)
 
 # Function to extract text from an image using Tesseract OCR
 def extract_text_from_image(image_path):
     try:
-        text = pytesseract.image_to_string(Image.open(image_path))
+        img = Image.open(image_path)
+        text = pytesseract.image_to_string(img)
         return text.strip()
     except Exception as e:
-        return str(e)
+        return f"Error processing image: {str(e)}"
 
 # Function to extract text from a PDF file
 def extract_text_from_pdf(pdf_path):
@@ -36,23 +83,18 @@ def extract_text_from_pdf(pdf_path):
         with fitz.open(pdf_path) as doc:
             for page in doc:
                 text += page.get_text("text") + "\n"
-        return text.strip()
+        return text.strip() if text else "Error: No text found in PDF"
     except Exception as e:
-        return str(e)
+        return f"Error processing PDF: {str(e)}"
 
-# Function to extract text from a Word file
+# Function to extract text from a Word file (.docx)
 def extract_text_from_docx(docx_path):
     try:
         doc = docx.Document(docx_path)
         text = "\n".join([para.text for para in doc.paragraphs])
-        return text.strip()
+        return text.strip() if text else "Error: No text found in DOCX"
     except Exception as e:
-        return str(e)
-
-# Function to extract key dates using spaCy NLP
-def extract_dates(text):
-    doc = nlp(text)
-    return [ent.text for ent in doc.ents if ent.label_ == "DATE"]
+        return f"Error processing DOCX: {str(e)}"
 
 # Preprocess extracted text for better classification
 def preprocess_text(text):
@@ -67,7 +109,7 @@ def is_resume(text):
 
 # Check if the document is a certificate
 def is_certificate(text):
-    certificate_keywords = ["this is to certify", "has successfully completed", "certificate of completion", "awarded", "achievement"]
+    certificate_keywords = ["this is to certify", "certificate of completion", "has successfully completed", "awarded", "achievement"]
     if any(keyword in text for keyword in certificate_keywords):
         if "certifications" in text and "certificate of completion" not in text:
             return False  
@@ -103,10 +145,12 @@ def process_documents():
             continue  # Skip unsupported files
 
         dates = extract_dates(text)
+        names = extract_names(text)
         category = categorize_document(text)
         
         print(f"Processing file: {filename}")
         print(f"Extracted Dates: {', '.join(dates) if dates else 'No dates found'}")
+        print(f"Extracted Names: {', '.join(names) if names else 'No names found'}")
         print(f"Predicted Category: {category}")
         print("\n" + "=" * 50 + "\n")
 
