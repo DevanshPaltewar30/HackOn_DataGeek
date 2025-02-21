@@ -158,7 +158,8 @@ def upload_file():
         file.save(file_path)
         extract_zip(file_path)
         process_documents()
-        return redirect(url_for('sorting_complete'))
+        zip_file_url = os.path.abspath("uploads/sorted_documents.zip")
+        return render_template('result.html', zip_file_url=zip_file_url)
     except Exception as e:
         return f"An error occurred during processing: {str(e)}"
     
