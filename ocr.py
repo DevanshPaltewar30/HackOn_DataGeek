@@ -7,12 +7,18 @@ import fitz  # PyMuPDF for PDF processing
 import docx  # python-docx for Word document processing
 from transformers import pipeline
 import re
+import shutil  # For creating ZIP files
 
 nlp = spacy.load("en_core_web_sm")
 
 UPLOAD_FOLDER = 'uploads'
+SORTED_FOLDER = 'sorted_documents'
+ZIP_FILE = 'sorted_documents.zip'
+
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+if not os.path.exists(SORTED_FOLDER):
+    os.makedirs(SORTED_FOLDER)
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
 
@@ -127,11 +133,21 @@ def process_documents():
         dates, names = extract_dates_and_names(text)
         category = categorize_document(text)
         
+        category_folder = os.path.join(SORTED_FOLDER, category)
+        if not os.path.exists(category_folder):
+            os.makedirs(category_folder)
+        
+        shutil.move(file_path, os.path.join(category_folder, filename))
+        
         print(f"Processing file: {filename}")
         print(f"Extracted Dates: {', '.join(dates) if dates else 'No dates found'}")
         print(f"Extracted Names: {', '.join(names) if names else 'No names found'}")
         print(f"Predicted Category: {category}")
         print("\n" + "=" * 50 + "\n")
+    
+    # Create ZIP file of sorted documents
+    shutil.make_archive(ZIP_FILE.replace(".zip", ""), 'zip', SORTED_FOLDER)
+    print(f"Zipped all sorted documents as {ZIP_FILE}")
 
 # Run the document processing
 if __name__ == '__main__':
